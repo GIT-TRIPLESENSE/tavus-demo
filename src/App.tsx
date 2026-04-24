@@ -1,4 +1,39 @@
+import { useEffect, useState } from 'react'
+import { LiveDemo } from './components/LiveDemo'
+
+type View = 'welcome' | 'demo'
+
+function readInitialView(): View {
+  if (typeof window === 'undefined') return 'welcome'
+  return window.location.hash === '#demo' ? 'demo' : 'welcome'
+}
+
 function App() {
+  const [view, setView] = useState<View>(readInitialView)
+
+  useEffect(() => {
+    function onHashChange() {
+      setView(readInitialView())
+    }
+    window.addEventListener('hashchange', onHashChange)
+    return () => window.removeEventListener('hashchange', onHashChange)
+  }, [])
+
+  function go(next: View) {
+    setView(next)
+    if (typeof window !== 'undefined') {
+      window.location.hash = next === 'demo' ? 'demo' : ''
+    }
+  }
+
+  if (view === 'demo') {
+    return <LiveDemo onExit={() => go('welcome')} />
+  }
+
+  return <Welcome onOpenDemo={() => go('demo')} />
+}
+
+function Welcome({ onOpenDemo }: { onOpenDemo: () => void }) {
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white flex items-center justify-center px-6">
       <section className="max-w-2xl w-full text-center space-y-8">
@@ -16,10 +51,24 @@ function App() {
 
         <p className="text-lg text-slate-300">
           Progetto React inizializzato con Vite, TypeScript e Tailwind CSS.
-          Pronto per iniziare a costruire qualcosa di straordinario.
+          Pronto per un webinar live sugli avatar AI emotivamente intelligenti.
         </p>
 
         <div className="flex flex-wrap justify-center gap-3 pt-4">
+          <button
+            onClick={onOpenDemo}
+            className="rounded-lg bg-gradient-to-r from-fuchsia-500 to-cyan-400 px-5 py-2.5 text-sm font-semibold text-slate-950 shadow-[0_6px_24px_-8px_rgba(217,70,239,0.6)] transition hover:shadow-[0_10px_30px_-6px_rgba(217,70,239,0.7)]"
+          >
+            Apri la demo CVI live →
+          </button>
+          <a
+            href="https://docs.tavus.io/sections/introduction"
+            target="_blank"
+            rel="noreferrer"
+            className="rounded-lg bg-white/10 px-5 py-2.5 text-sm font-medium text-white ring-1 ring-white/10 transition hover:bg-white/20"
+          >
+            Docs Tavus
+          </a>
           <a
             href="https://vite.dev"
             target="_blank"
@@ -47,7 +96,15 @@ function App() {
         </div>
 
         <p className="pt-8 text-sm text-slate-500">
-          Modifica <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-slate-200">src/App.tsx</code> per iniziare.
+          Modifica{' '}
+          <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-slate-200">
+            src/App.tsx
+          </code>{' '}
+          per iniziare. La demo live è in{' '}
+          <code className="rounded bg-white/10 px-1.5 py-0.5 font-mono text-slate-200">
+            src/components/LiveDemo.tsx
+          </code>
+          .
         </p>
       </section>
     </main>
