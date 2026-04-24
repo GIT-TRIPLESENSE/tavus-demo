@@ -4,6 +4,8 @@ import { Badge } from './ui/Badge'
 interface AvatarStageProps {
   videoTrack: MediaStreamTrack | null
   audioTrack: MediaStreamTrack | null
+  /** Local webcam track for the picture-in-picture self-view. */
+  localVideoTrack: MediaStreamTrack | null
   connectionLabel: string
   connectionTone: 'live' | 'info' | 'warn' | 'neutral'
   durationLabel: string
@@ -14,6 +16,7 @@ interface AvatarStageProps {
 export function AvatarStage({
   videoTrack,
   audioTrack,
+  localVideoTrack,
   connectionLabel,
   connectionTone,
   durationLabel,
@@ -22,6 +25,7 @@ export function AvatarStage({
 }: AvatarStageProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
+  const localVideoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
     const el = videoRef.current
@@ -46,6 +50,18 @@ export function AvatarStage({
       el.srcObject = null
     }
   }, [audioTrack])
+
+  useEffect(() => {
+    const el = localVideoRef.current
+    if (!el) return
+    if (localVideoTrack) {
+      const stream = new MediaStream([localVideoTrack])
+      el.srcObject = stream
+      el.play().catch(() => {})
+    } else {
+      el.srcObject = null
+    }
+  }, [localVideoTrack])
 
   const ringColor = isReplicaSpeaking
     ? 'ring-fuchsia-400/60 shadow-[0_0_60px_-10px_rgba(217,70,239,0.7)]'
@@ -92,6 +108,48 @@ export function AvatarStage({
         )}
         {/* Hidden <audio> so remote audio is played even if <video> is muted */}
         <audio ref={audioRef} autoPlay playsInline className="hidden" />
+
+        <SelfView
+          ref={localVideoRef}
+          active={Boolean(localVideoTrack)}
+          highlight={isUserSpeaking}
+        />
+      </div>
+    </div>
+  )
+}
+
+interface SelfViewProps {
+  active: boolean
+  highlight: boolean
+  ref: React.RefObject<HTMLVideoElement | null>
+}
+
+function SelfView({ ref, active, highlight }: SelfViewProps) {
+  return (
+    <div
+      className={[
+        'absolute bottom-3 right-3 z-10 aspect-video w-40 overflow-hidden rounded-lg border bg-black/80 shadow-lg ring-1 transition-all duration-300 sm:w-48 md:w-56',
+        highlight
+          ? 'border-cyan-300/60 ring-cyan-300/40 shadow-[0_0_32px_-8px_rgba(34,211,238,0.6)]'
+          : 'border-white/15 ring-black/20',
+      ].join(' ')}
+    >
+      {active ? (
+        <video
+          ref={ref}
+          autoPlay
+          playsInline
+          muted
+          className="h-full w-full -scale-x-100 object-cover"
+        />
+      ) : (
+        <div className="flex h-full w-full items-center justify-center text-[10px] text-white/40">
+          Webcam off
+        </div>
+      )}
+      <div className="pointer-events-none absolute left-1.5 top-1.5 rounded bg-black/50 px-1.5 py-0.5 text-[9px] font-medium uppercase tracking-wider text-white/80">
+        You
       </div>
     </div>
   )

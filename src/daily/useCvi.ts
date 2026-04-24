@@ -44,6 +44,7 @@ export interface UseCviReturn {
   latestEvent: NormalizedCviEvent | null
   remoteVideoTrack: MediaStreamTrack | null
   remoteAudioTrack: MediaStreamTrack | null
+  localVideoTrack: MediaStreamTrack | null
   replicaParticipantId: string | null
   isUserSpeaking: boolean
   isReplicaSpeaking: boolean
@@ -86,6 +87,7 @@ export function useCvi({ onEvent }: UseCviOptions = {}): UseCviReturn {
   const [latestEvent, setLatestEvent] = useState<NormalizedCviEvent | null>(null)
   const [remoteVideoTrack, setRemoteVideoTrack] = useState<MediaStreamTrack | null>(null)
   const [remoteAudioTrack, setRemoteAudioTrack] = useState<MediaStreamTrack | null>(null)
+  const [localVideoTrack, setLocalVideoTrack] = useState<MediaStreamTrack | null>(null)
   const [replicaParticipantId, setReplicaParticipantId] = useState<string | null>(null)
   const [isUserSpeaking, setUserSpeaking] = useState(false)
   const [isReplicaSpeaking, setReplicaSpeaking] = useState(false)
@@ -208,15 +210,17 @@ export function useCvi({ onEvent }: UseCviOptions = {}): UseCviReturn {
   const refreshRemoteTracks = useCallback((call: DailyCall) => {
     const participants = call.participants()
     const remote = Object.values(participants).find((p) => !p.local)
-    if (!remote) {
+    const local = participants.local
+    if (remote) {
+      setReplicaParticipantId(remote.session_id)
+      setRemoteVideoTrack(readVideoTrack(remote))
+      setRemoteAudioTrack(readAudioTrack(remote))
+    } else {
       setRemoteVideoTrack(null)
       setRemoteAudioTrack(null)
       setReplicaParticipantId(null)
-      return
     }
-    setReplicaParticipantId(remote.session_id)
-    setRemoteVideoTrack(readVideoTrack(remote))
-    setRemoteAudioTrack(readAudioTrack(remote))
+    setLocalVideoTrack(readVideoTrack(local))
   }, [])
 
   const attachListeners = useCallback(
@@ -292,6 +296,7 @@ export function useCvi({ onEvent }: UseCviOptions = {}): UseCviReturn {
     setState('idle')
     setRemoteVideoTrack(null)
     setRemoteAudioTrack(null)
+    setLocalVideoTrack(null)
     setReplicaParticipantId(null)
   }, [])
 
@@ -328,6 +333,7 @@ export function useCvi({ onEvent }: UseCviOptions = {}): UseCviReturn {
       latestEvent,
       remoteVideoTrack,
       remoteAudioTrack,
+      localVideoTrack,
       replicaParticipantId,
       isUserSpeaking,
       isReplicaSpeaking,
@@ -344,6 +350,7 @@ export function useCvi({ onEvent }: UseCviOptions = {}): UseCviReturn {
       latestEvent,
       remoteVideoTrack,
       remoteAudioTrack,
+      localVideoTrack,
       replicaParticipantId,
       isUserSpeaking,
       isReplicaSpeaking,

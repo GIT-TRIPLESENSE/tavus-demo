@@ -175,6 +175,7 @@ export function LiveDemo({ onExit }: LiveDemoProps) {
           <AvatarStage
             videoTrack={cvi.remoteVideoTrack}
             audioTrack={cvi.remoteAudioTrack}
+            localVideoTrack={cvi.localVideoTrack}
             connectionLabel={connectionLabel}
             connectionTone={connectionTone}
             durationLabel={duration}
