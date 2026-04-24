@@ -5,7 +5,7 @@ import { useCvi } from '../daily/useCvi'
 import { ConnectPanel, type ConnectFormValues } from './ConnectPanel'
 import { AvatarStage } from './AvatarStage'
 import { TranscriptPanel } from './panels/TranscriptPanel'
-import { EmotionsPanel } from './panels/EmotionsPanel'
+import { SentimentPanel } from './panels/SentimentPanel'
 import { LatencyPanel } from './panels/LatencyPanel'
 import { PipelinePanel } from './panels/PipelinePanel'
 import { Badge } from './ui/Badge'
@@ -193,7 +193,7 @@ export function LiveDemo({ onExit }: LiveDemoProps) {
           </div>
         </section>
         <aside className="space-y-4">
-          <EmotionsPanel signals={cvi.emotions} />
+          <SentimentPanel entries={cvi.transcript} />
           <TranscriptPanel entries={cvi.transcript} />
         </aside>
       </main>

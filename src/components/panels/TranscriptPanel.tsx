@@ -3,6 +3,10 @@ import type { TranscriptEntry } from '../../types/cvi'
 import { Card } from '../ui/Card'
 import { Badge } from '../ui/Badge'
 import { capitalize } from '../../utils/format'
+import {
+  parseAudioAnalysis,
+  parseVisualAnalysis,
+} from '../../utils/sentiment'
 
 interface TranscriptPanelProps {
   entries: TranscriptEntry[]
@@ -41,6 +45,15 @@ export function TranscriptPanel({ entries }: TranscriptPanelProps) {
   )
 }
 
+function summarize(text: string | undefined): string | undefined {
+  if (!text) return undefined
+  const trimmed = text.trim()
+  if (!trimmed) return undefined
+  const end = trimmed.search(/[.!?]\s|$/)
+  const slice = end > 0 ? trimmed.slice(0, end) : trimmed
+  return slice.length > 40 ? `${slice.slice(0, 37)}…` : slice
+}
+
 function TranscriptRow({ entry }: { entry: TranscriptEntry }) {
   const isUser = entry.role === 'user'
   return (
@@ -70,24 +83,19 @@ function TranscriptRow({ entry }: { entry: TranscriptEntry }) {
       </p>
       {(entry.audioAnalysis || entry.visualAnalysis) && (
         <div className="mt-1 flex flex-wrap gap-1.5">
-          {entry.audioAnalysis && (
-            <Badge tone="warn">
-              audio · {String(
-                entry.audioAnalysis.emotion ??
-                  entry.audioAnalysis.tone ??
-                  'signal',
-              )}
-            </Badge>
-          )}
-          {entry.visualAnalysis && (
-            <Badge tone="warn">
-              vision · {String(
-                entry.visualAnalysis.emotion ??
-                  entry.visualAnalysis.expression ??
-                  'signal',
-              )}
-            </Badge>
-          )}
+          {entry.audioAnalysis &&
+            (() => {
+              const audio = parseAudioAnalysis(entry.audioAnalysis)
+              const label = audio.tags[0] ?? audio.text.slice(0, 32)
+              if (!label) return null
+              return <Badge tone="warn">audio · {label}</Badge>
+            })()}
+          {entry.visualAnalysis &&
+            (() => {
+              const visual = parseVisualAnalysis(entry.visualAnalysis)
+              const label = summarize(visual.emotions) ?? 'vision'
+              return <Badge tone="warn">vision · {label}</Badge>
+            })()}
         </div>
       )}
     </div>
