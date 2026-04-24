@@ -3,6 +3,8 @@ import type { HTMLAttributes, ReactNode } from 'react'
 interface CardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'title'> {
   title?: ReactNode
   subtitle?: ReactNode
+  /** Optional node rendered to the right of the title (e.g. a Badge). */
+  titleTrailing?: ReactNode
   accent?: 'fuchsia' | 'cyan' | 'emerald' | 'amber' | 'none'
   tone?: 'default' | 'muted'
 }
@@ -18,6 +20,7 @@ const accentRing: Record<NonNullable<CardProps['accent']>, string> = {
 export function Card({
   title,
   subtitle,
+  titleTrailing,
   accent = 'none',
   tone = 'default',
   className = '',
@@ -40,7 +43,7 @@ export function Card({
         className,
       ].join(' ')}
     >
-      {(title || subtitle) && (
+      {(title || subtitle || titleTrailing) && (
         <div className="relative px-5 pt-4 pb-3 border-b border-white/5 flex items-baseline justify-between gap-3">
           <div>
             {title && (
@@ -52,6 +55,9 @@ export function Card({
               <p className="text-xs text-white/40 mt-0.5">{subtitle}</p>
             )}
           </div>
+          {titleTrailing && (
+            <div className="shrink-0">{titleTrailing}</div>
+          )}
         </div>
       )}
       <div className="relative">{children}</div>

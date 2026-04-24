@@ -11,6 +11,20 @@ import type {
   LatencySample,
   TranscriptEntry,
 } from '../types/cvi'
+import {
+  parseAudioAnalysis,
+  parseVisualAnalysis,
+} from '../utils/sentiment'
+
+/** Return the first sentence-ish fragment (capped) for a compact label. */
+function firstSentence(text: string | undefined): string | undefined {
+  if (!text) return undefined
+  const trimmed = text.trim()
+  if (!trimmed) return undefined
+  const end = trimmed.search(/[.!?]\s|$/)
+  const slice = end > 0 ? trimmed.slice(0, end) : trimmed
+  return slice.length > 80 ? `${slice.slice(0, 77)}…` : slice
+}
 
 export interface UseCviOptions {
   onEvent?: (event: NormalizedCviEvent) => void
@@ -108,36 +122,27 @@ export function useCvi({ onEvent }: UseCviOptions = {}): UseCviReturn {
             },
           ])
           if (parsed.audioAnalysis) {
-            const label =
-              (parsed.audioAnalysis.emotion as string | undefined) ??
-              (parsed.audioAnalysis.tone as string | undefined) ??
-              'audio signal'
+            const audio = parseAudioAnalysis(parsed.audioAnalysis)
+            const label = audio.tags[0] ?? audio.text.slice(0, 40) ?? 'audio'
             pushEmotion({
               id: `${Date.now()}-audio`,
               timestamp: Date.now(),
               source: 'user_audio_analysis',
               modality: 'audio',
-              label,
-              detail:
-                (parsed.audioAnalysis.delivery as string | undefined) ??
-                (parsed.audioAnalysis.pace as string | undefined),
+              label: label || 'audio',
+              detail: audio.text && audio.text !== label ? audio.text : undefined,
             })
           }
           if (parsed.visualAnalysis) {
-            const label =
-              (parsed.visualAnalysis.emotion as string | undefined) ??
-              (parsed.visualAnalysis.expression as string | undefined) ??
-              'visual signal'
+            const visual = parseVisualAnalysis(parsed.visualAnalysis)
+            const label = firstSentence(visual.emotions) ?? 'visual'
             pushEmotion({
               id: `${Date.now()}-visual`,
               timestamp: Date.now(),
               source: 'user_visual_analysis',
               modality: 'vision',
               label,
-              detail:
-                (parsed.visualAnalysis.demeanor as string | undefined) ??
-                (parsed.visualAnalysis.appearance as string | undefined) ??
-                (parsed.visualAnalysis.body_language as string | undefined),
+              detail: visual.appearance,
             })
           }
           break

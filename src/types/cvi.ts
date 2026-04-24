@@ -17,26 +17,13 @@ export interface TavusCreateConversationResponse {
   created_at: string
 }
 
-/** Visual analysis attached to a user utterance when the persona uses Raven-1. */
-export interface UserVisualAnalysis {
-  emotion?: string
-  expression?: string
-  appearance?: string
-  demeanor?: string
-  body_language?: string
-  /** Free-form extra fields returned by Raven. */
-  [key: string]: unknown
-}
-
-/** Audio/tone analysis attached to a user utterance when the persona uses Raven-1. */
-export interface UserAudioAnalysis {
-  tone?: string
-  emotion?: string
-  delivery?: string
-  pace?: string
-  volume?: string
-  [key: string]: unknown
-}
+/**
+ * Raven attaches its analysis as a free-form string (XML-like tags such as
+ * `<user_appearance>` / `<user_emotions>`) or, in some SDK versions, as a
+ * structured object. We accept both shapes and normalize them downstream.
+ */
+export type UserVisualAnalysis = string | Record<string, unknown>
+export type UserAudioAnalysis = string | Record<string, unknown>
 
 export interface UtteranceProperties {
   role?: CviRole
