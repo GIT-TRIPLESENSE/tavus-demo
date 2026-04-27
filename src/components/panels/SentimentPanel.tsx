@@ -19,44 +19,44 @@ interface SentimentPanelProps {
 }
 
 const DIMENSION_LABEL: Record<SentimentDimension, string> = {
-  fiducia: 'fiducia',
-  interesse: 'interesse',
-  sorpresa: 'sorpresa',
-  frustrazione: 'frustrazione',
-  rabbia: 'rabbia',
-  neutro: 'neutro',
+  coinvolgimento: 'coinvolgimento',
+  positivita: 'positività',
+  tensione: 'tensione',
+  esitazione: 'esitazione',
+  attivazione: 'attivazione',
+  calma: 'calma',
 }
 
 const DIMENSION_COLOR: Record<
   SentimentDimension,
   { bar: string; bg: string; text: string }
 > = {
-  fiducia: {
-    bar: 'bg-emerald-400',
-    bg: 'bg-emerald-400/10',
-    text: 'text-emerald-300',
-  },
-  interesse: {
+  coinvolgimento: {
     bar: 'bg-sky-400',
     bg: 'bg-sky-400/10',
     text: 'text-sky-300',
   },
-  sorpresa: {
-    bar: 'bg-amber-400',
-    bg: 'bg-amber-400/10',
-    text: 'text-amber-300',
+  positivita: {
+    bar: 'bg-emerald-400',
+    bg: 'bg-emerald-400/10',
+    text: 'text-emerald-300',
   },
-  frustrazione: {
-    bar: 'bg-orange-400',
-    bg: 'bg-orange-400/10',
-    text: 'text-orange-300',
-  },
-  rabbia: {
+  tensione: {
     bar: 'bg-rose-500',
     bg: 'bg-rose-500/10',
     text: 'text-rose-300',
   },
-  neutro: {
+  esitazione: {
+    bar: 'bg-violet-400',
+    bg: 'bg-violet-400/10',
+    text: 'text-violet-300',
+  },
+  attivazione: {
+    bar: 'bg-amber-400',
+    bg: 'bg-amber-400/10',
+    text: 'text-amber-300',
+  },
+  calma: {
     bar: 'bg-white/40',
     bg: 'bg-white/[0.04]',
     text: 'text-white/60',
@@ -208,16 +208,16 @@ function hasAnalysis(e: TranscriptEntry): boolean {
 }
 
 function pickDominant(scores: SentimentScores): SentimentDimension {
-  let best: SentimentDimension = 'neutro'
+  let best: SentimentDimension = 'calma'
   let bestVal = -1
   for (const dim of SENTIMENT_DIMENSIONS) {
-    if (dim === 'neutro') continue
+    if (dim === 'calma') continue
     if (scores[dim] > bestVal) {
       bestVal = scores[dim]
       best = dim
     }
   }
-  if (bestVal <= 5) return 'neutro'
+  if (bestVal <= 5) return 'calma'
   return best
 }
 
