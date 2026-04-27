@@ -7,7 +7,7 @@ import { AvatarStage } from './AvatarStage'
 import { TranscriptPanel } from './panels/TranscriptPanel'
 import { SentimentPanel } from './panels/SentimentPanel'
 import { LatencyPanel } from './panels/LatencyPanel'
-import { PipelinePanel } from './panels/PipelinePanel'
+import { PipelineStrip } from './PipelineStrip'
 import { Badge } from './ui/Badge'
 import { formatDuration } from '../utils/format'
 
@@ -131,7 +131,7 @@ export function LiveDemo({ onExit }: LiveDemoProps) {
   const duration = startedAt ? formatDuration(now - startedAt) : '0:00'
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(1200px_800px_at_10%_-200px,rgba(217,70,239,0.12),transparent),radial-gradient(900px_600px_at_90%_110%,rgba(34,211,238,0.08),transparent)] bg-slate-950 text-white">
+    <div className="flex h-screen flex-col overflow-hidden bg-[radial-gradient(1200px_800px_at_10%_-200px,rgba(217,70,239,0.12),transparent),radial-gradient(900px_600px_at_90%_110%,rgba(34,211,238,0.08),transparent)] bg-slate-950 text-white">
       <header className="flex items-center justify-between gap-4 border-b border-white/5 px-6 py-3">
         <div className="flex items-center gap-3">
           <button
@@ -170,36 +170,38 @@ export function LiveDemo({ onExit }: LiveDemoProps) {
         </div>
       )}
 
-      <main className="grid gap-4 p-4 lg:grid-cols-[minmax(0,2.1fr)_minmax(340px,1fr)]">
-        <section className="space-y-4">
-          <AvatarStage
-            videoTrack={cvi.remoteVideoTrack}
-            audioTrack={cvi.remoteAudioTrack}
-            localVideoTrack={cvi.localVideoTrack}
-            connectionLabel={connectionLabel}
-            connectionTone={connectionTone}
-            durationLabel={duration}
-            isUserSpeaking={cvi.isUserSpeaking}
-            isReplicaSpeaking={cvi.isReplicaSpeaking}
-          />
-          <div className="grid gap-4 md:grid-cols-2">
-            <LatencyPanel samples={cvi.latency} />
-            <PipelinePanel
+      <main className="grid min-h-0 flex-1 gap-4 p-4 lg:grid-cols-[minmax(0,2.1fr)_minmax(360px,1fr)]">
+        <section className="flex min-h-0 flex-col gap-3">
+          <div className="min-h-0 flex-1">
+            <AvatarStage
+              videoTrack={cvi.remoteVideoTrack}
+              audioTrack={cvi.remoteAudioTrack}
+              localVideoTrack={cvi.localVideoTrack}
+              connectionLabel={connectionLabel}
+              connectionTone={connectionTone}
+              durationLabel={duration}
               isUserSpeaking={cvi.isUserSpeaking}
               isReplicaSpeaking={cvi.isReplicaSpeaking}
-              hasVideo={Boolean(cvi.remoteVideoTrack)}
-              personaId={persona}
-              replicaId={replica}
             />
           </div>
+          <PipelineStrip
+            isUserSpeaking={cvi.isUserSpeaking}
+            isReplicaSpeaking={cvi.isReplicaSpeaking}
+            hasVideo={Boolean(cvi.remoteVideoTrack)}
+            personaId={persona}
+            replicaId={replica}
+          />
         </section>
-        <aside className="space-y-4">
+        <aside className="flex min-h-0 flex-col gap-3">
           <SentimentPanel
             entries={cvi.transcript}
             openaiApiKey={import.meta.env.VITE_OPENAI_API_KEY}
             openaiModel={import.meta.env.VITE_OPENAI_SENTIMENT_MODEL}
           />
-          <TranscriptPanel entries={cvi.transcript} />
+          <LatencyPanel samples={cvi.latency} />
+          <div className="min-h-0 flex-1">
+            <TranscriptPanel entries={cvi.transcript} />
+          </div>
         </aside>
       </main>
     </div>

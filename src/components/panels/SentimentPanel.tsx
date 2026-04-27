@@ -123,7 +123,7 @@ export function SentimentPanel({
         </div>
       }
     >
-      <div className="space-y-4 px-5 py-4">
+      <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
         {!hasSignal && (
           <p className="text-xs text-white/40">
             Sentiment values appear as soon as the first user turn arrives with
@@ -160,7 +160,7 @@ export function SentimentPanel({
           <>
             <Section title="Emozioni (Raven)" accent="fuchsia">
               {visual.emotions ? (
-                <p className="whitespace-pre-wrap text-xs leading-relaxed text-white/80">
+                <p className="line-clamp-3 whitespace-pre-wrap text-xs leading-relaxed text-white/80">
                   {visual.emotions}
                 </p>
               ) : (
@@ -171,7 +171,7 @@ export function SentimentPanel({
             </Section>
             <Section title="Aspetto" accent="cyan">
               {visual.appearance ? (
-                <p className="whitespace-pre-wrap text-xs leading-relaxed text-white/70">
+                <p className="line-clamp-2 whitespace-pre-wrap text-xs leading-relaxed text-white/70">
                   {visual.appearance}
                 </p>
               ) : (
