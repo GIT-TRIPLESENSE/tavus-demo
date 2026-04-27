@@ -59,29 +59,61 @@ export interface SentimentJobCancel {
 type WorkerInbound = SentimentJobRequest | SentimentJobCancel
 type WorkerOutbound = SentimentJobResponse | SentimentJobError
 
-const SYSTEM_PROMPT = `You are a sentiment analyzer for a video-call demo.
-You receive a free-form English description of a user's facial expression
-and emotional state, produced by the Raven-1 perception model (which emits
-natural language, not categorical labels). Your job is to estimate, on a
-0–100 scale, how strongly each of these six Italian-labelled dimensions is
-present in the description:
+const SYSTEM_PROMPT = `You are a sentiment analyzer for a live conversational
+video demo. You receive free-form English descriptions of a user's visual
+appearance, facial expression, posture, gaze and vocal tone, produced by
+the Tavus Raven-1 perception model.
 
-- fiducia: confidence, self-assurance, trust, engagement
-- interesse: interest, curiosity, attentiveness, focus on the conversation
-- sorpresa: surprise, shock, astonishment
-- frustrazione: frustration, confusion, impatience, mild annoyance
-- rabbia: anger, hostility, aggression
-- neutro: neutrality, calm baseline, lack of strong emotion
+IMPORTANT — about Raven-1's output style:
+Raven-1 explicitly does NOT use categorical emotion labels. It almost never
+writes "angry", "happy" or "sad" outright. Instead it describes OBSERVABLE
+CUES: "jaw is tight, brow is furrowed, voice elevated and sharp", "smiling
+slightly with relaxed posture", "eyes shifting, pausing before answering".
+Your job is to translate those observable cues into numeric scores on six
+dimensions chosen to match Raven's actual vocabulary.
 
-Rules:
-- Multiple dimensions can be present at once (e.g. fiducia+interesse).
-- "neutro" should be high when the description is bland or unexpressive,
-  and decrease as other dimensions activate.
-- Use the full 0-100 range. Do not anchor everything around 50.
-- If the description is empty or uninformative, return neutro=70 and
-  others=0–10.
-- "rationale" must be ONE short sentence in Italian explaining the
-  dominant cue you saw (max 20 words).`
+Dimensions (Italian labels, 0–100 each):
+
+- coinvolgimento (engagement / attention): looking at the screen or camera,
+  focused, leaning forward, attentive, listening intently, eyes fixed on
+  the speaker, processing information, observing.
+- positivita (positive valence): smiling, grinning, laughing, warm tone,
+  cheerful, enthusiastic, animated in a positive way, open posture.
+- tensione (tension / anger / frustration / discomfort): clenched jaw,
+  tight lips, furrowed/knit brow, narrowed eyes, glaring, scowling,
+  frowning, pursed lips, sharp/harsh/cutting tone, raised or elevated
+  voice, shouting, snapping, sighing, huffing, agitated, irritated,
+  exasperated, defensive, eye rolls. THIS IS WHERE STRONG NEGATIVE
+  EMOTIONS LIVE — score it HIGH whenever you see physical-tension cues,
+  even if Raven never writes the word "angry" or "frustrated".
+- esitazione (hesitation / uncertainty): pausing, hesitant, unsure,
+  uncertain, eyes shifting or darting, looking away/down, avoiding eye
+  contact, fidgeting, biting lip, hedging, trailing off, lost in thought,
+  confused, puzzled.
+- attivazione (high arousal / surprise / alarm): eyes wide or widened,
+  raised eyebrows, gasping, sharp inhale, jaw dropped, mouth agape,
+  startled, shocked, stunned, alarmed, sudden movement, energized.
+- calma (neutral baseline / composed): neutral expression, even tone,
+  steady gaze, quiet, subdued, reserved, unexpressive, impassive, blank,
+  baseline.
+
+Scoring rules:
+- Multiple dimensions can be high at once. Mixed states are normal
+  (e.g. coinvolgimento=80 + esitazione=60 for a focused but uncertain user).
+- USE THE FULL RANGE. Strong cues deserve strong scores: a clearly
+  furrowed brow + sharp tone + clenched jaw should produce tensione ≥ 80.
+  Do NOT anchor everything around 50.
+- calma decreases as tensione, attivazione, or esitazione rise. Calma
+  should be HIGH (70+) only when the description is bland or explicitly
+  neutral.
+- If the description is empty or uninformative, return calma=70 and
+  the rest 0–15.
+- IGNORE the user's spoken text content (transcript). Only the
+  observable cues matter — a polite sentence said with clenched teeth
+  is still high tensione.
+- "rationale" must be ONE short Italian sentence (max 20 words) naming
+  the dominant CUE you saw, not the dominant label. Example:
+  "Mascella contratta e tono tagliente → tensione alta."`
 
 const SCHEMA = {
   name: 'sentiment_scores',
@@ -89,21 +121,21 @@ const SCHEMA = {
     type: 'object',
     additionalProperties: false,
     required: [
-      'fiducia',
-      'interesse',
-      'sorpresa',
-      'frustrazione',
-      'rabbia',
-      'neutro',
+      'coinvolgimento',
+      'positivita',
+      'tensione',
+      'esitazione',
+      'attivazione',
+      'calma',
       'rationale',
     ],
     properties: {
-      fiducia: { type: 'integer', minimum: 0, maximum: 100 },
-      interesse: { type: 'integer', minimum: 0, maximum: 100 },
-      sorpresa: { type: 'integer', minimum: 0, maximum: 100 },
-      frustrazione: { type: 'integer', minimum: 0, maximum: 100 },
-      rabbia: { type: 'integer', minimum: 0, maximum: 100 },
-      neutro: { type: 'integer', minimum: 0, maximum: 100 },
+      coinvolgimento: { type: 'integer', minimum: 0, maximum: 100 },
+      positivita: { type: 'integer', minimum: 0, maximum: 100 },
+      tensione: { type: 'integer', minimum: 0, maximum: 100 },
+      esitazione: { type: 'integer', minimum: 0, maximum: 100 },
+      attivazione: { type: 'integer', minimum: 0, maximum: 100 },
+      calma: { type: 'integer', minimum: 0, maximum: 100 },
       rationale: { type: 'string', maxLength: 200 },
     },
   },
@@ -168,12 +200,12 @@ self.addEventListener('message', async (evt: MessageEvent<WorkerInbound>) => {
       type: 'result',
       jobId: msg.jobId,
       scores: {
-        fiducia: clamp(parsed.fiducia),
-        interesse: clamp(parsed.interesse),
-        sorpresa: clamp(parsed.sorpresa),
-        frustrazione: clamp(parsed.frustrazione),
-        rabbia: clamp(parsed.rabbia),
-        neutro: clamp(parsed.neutro),
+        coinvolgimento: clamp(parsed.coinvolgimento),
+        positivita: clamp(parsed.positivita),
+        tensione: clamp(parsed.tensione),
+        esitazione: clamp(parsed.esitazione),
+        attivazione: clamp(parsed.attivazione),
+        calma: clamp(parsed.calma),
       },
       rationale: parsed.rationale ?? '',
       durationMs: Math.round(performance.now() - startedAt),
