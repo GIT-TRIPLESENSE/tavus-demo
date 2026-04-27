@@ -35,7 +35,7 @@ export function Card({
     <div
       {...rest}
       className={[
-        'relative rounded-2xl border backdrop-blur-sm overflow-hidden',
+        'relative flex flex-col rounded-2xl border backdrop-blur-sm overflow-hidden',
         base,
         'before:content-[""] before:absolute before:inset-0 before:rounded-2xl before:pointer-events-none',
         'before:bg-gradient-to-br before:to-transparent',
@@ -44,7 +44,7 @@ export function Card({
       ].join(' ')}
     >
       {(title || subtitle || titleTrailing) && (
-        <div className="relative px-5 pt-4 pb-3 border-b border-white/5 flex items-baseline justify-between gap-3">
+        <div className="relative shrink-0 px-5 pt-4 pb-3 border-b border-white/5 flex items-baseline justify-between gap-3">
           <div>
             {title && (
               <h3 className="text-sm font-semibold tracking-tight text-white/90">
@@ -60,7 +60,7 @@ export function Card({
           )}
         </div>
       )}
-      <div className="relative">{children}</div>
+      <div className="relative flex min-h-0 flex-1 flex-col">{children}</div>
     </div>
   )
 }

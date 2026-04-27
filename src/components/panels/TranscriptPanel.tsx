@@ -30,7 +30,7 @@ export function TranscriptPanel({ entries }: TranscriptPanelProps) {
     >
       <div
         ref={scrollRef}
-        className="max-h-[42vh] min-h-[220px] space-y-3 overflow-y-auto px-5 py-4"
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4"
       >
         {entries.length === 0 && (
           <p className="text-xs text-white/40">

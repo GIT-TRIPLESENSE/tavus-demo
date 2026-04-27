@@ -15,7 +15,7 @@ export function LatencyPanel({ samples }: LatencyPanelProps) {
 
   // sparkline path
   const width = 260
-  const height = 60
+  const height = 48
   const max = Math.max(1200, ...values, 1)
   const min = 0
   const points = values.map((v, i) => {
@@ -32,15 +32,15 @@ export function LatencyPanel({ samples }: LatencyPanelProps) {
       subtitle="Δ user stop → replica start"
       accent="emerald"
     >
-      <div className="px-5 py-4">
-        <div className="grid grid-cols-4 gap-2">
+      <div className="px-5 py-3">
+        <div className="grid grid-cols-4 gap-1.5">
           <Stat label="Last" value={last !== undefined ? formatLatency(last) : '—'} highlight />
           <Stat label="Avg" value={values.length ? formatLatency(avg) : '—'} />
           <Stat label="p95" value={values.length ? formatLatency(p95) : '—'} />
           <Stat label="Best" value={values.length ? formatLatency(best) : '—'} />
         </div>
 
-        <div className="mt-4 rounded-lg border border-white/5 bg-slate-950/40 p-3">
+        <div className="mt-3 rounded-lg border border-white/5 bg-slate-950/40 p-2">
           <svg
             viewBox={`0 0 ${width} ${height}`}
             width="100%"
@@ -104,7 +104,7 @@ function Stat({
   return (
     <div
       className={[
-        'rounded-lg border px-2.5 py-2',
+        'rounded-lg border px-2 py-1.5',
         highlight
           ? 'border-emerald-400/30 bg-emerald-500/5'
           : 'border-white/5 bg-white/[0.02]',
@@ -113,7 +113,7 @@ function Stat({
       <p className="text-[10px] font-semibold uppercase tracking-wider text-white/40">
         {label}
       </p>
-      <p className="mt-0.5 text-lg font-semibold tabular-nums text-white">
+      <p className="mt-0.5 text-base font-semibold tabular-nums text-white">
         {value}
       </p>
     </div>

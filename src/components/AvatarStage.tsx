@@ -70,7 +70,7 @@ export function AvatarStage({
       : 'ring-white/10'
 
   return (
-    <div className="relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60">
+    <div className="relative flex h-full min-h-[320px] flex-col overflow-hidden rounded-2xl border border-white/10 bg-slate-900/60 pt-14">
       <div className="absolute inset-x-0 top-0 z-10 flex items-center justify-between p-4">
         <div className="flex items-center gap-2">
           <Badge tone={connectionTone} dot>
@@ -88,7 +88,7 @@ export function AvatarStage({
 
       <div
         className={[
-          'relative m-auto aspect-video w-[94%] max-w-[1280px] overflow-hidden rounded-xl bg-black ring-2 transition-all duration-300',
+          'relative mx-auto mt-2 aspect-video w-[94%] max-w-[1280px] overflow-hidden rounded-xl bg-black ring-2 transition-all duration-300',
           ringColor,
         ].join(' ')}
       >
