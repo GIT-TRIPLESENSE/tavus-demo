@@ -194,7 +194,11 @@ export function LiveDemo({ onExit }: LiveDemoProps) {
           </div>
         </section>
         <aside className="space-y-4">
-          <SentimentPanel entries={cvi.transcript} />
+          <SentimentPanel
+            entries={cvi.transcript}
+            openaiApiKey={import.meta.env.VITE_OPENAI_API_KEY}
+            openaiModel={import.meta.env.VITE_OPENAI_SENTIMENT_MODEL}
+          />
           <TranscriptPanel entries={cvi.transcript} />
         </aside>
       </main>
